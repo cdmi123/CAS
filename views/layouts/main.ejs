@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Cricket Auction System</title>
+  
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <!-- Bootstrap Icons -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
+    <div class="container-fluid">
+      <a class="navbar-brand d-flex align-items-center" href="/">
+        <i class="bi bi-trophy-fill me-2"></i>
+        <span class="fw-bold">Cricket Auction</span>
+      </a>
+      
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav me-auto">
+          <% if (user && user.role === 'admin') { %>
+            <li class="nav-item">
+              <a class="nav-link <%= title === 'Admin Dashboard' ? 'active' : '' %>" href="/admin/dashboard">
+                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link <%= title === 'Players Management' ? 'active' : '' %>" href="/admin/players">
+                <i class="bi bi-people me-1"></i> Players
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link <%= title === 'Teams Management' ? 'active' : '' %>" href="/admin/teams">
+                <i class="bi bi-shield-shaded me-1"></i> Teams
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link <%= title === 'Auction Control' ? 'active' : '' %>" href="/admin/auction">
+                <i class="bi bi-hammer me-1"></i> Auction
+              </a>
+            </li>
+          <% } else if (user && user.role === 'team') { %>
+            <li class="nav-item">
+              <a class="nav-link <%= title === 'Team Dashboard' ? 'active' : '' %>" href="/team/dashboard">
+                <i class="bi bi-speedometer2 me-1"></i> Dashboard
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link <%= title === 'Available Players' ? 'active' : '' %>" href="/team/players">
+                <i class="bi bi-people me-1"></i> Players
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link <%= title === 'Live Auction' ? 'active' : '' %>" href="/team/auction">
+                <i class="bi bi-hammer me-1"></i> Auction
+              </a>
+            </li>
+          <% } %>
+        </ul>
+        
+        <ul class="navbar-nav">
+          <% if (user) { %>
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                <i class="bi bi-person-circle me-1"></i>
+                <%= user.username %>
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="/auth/logout">
+                  <i class="bi bi-box-arrow-right me-2"></i> Logout
+                </a></li>
+              </ul>
+            </li>
+          <% } else { %>
+            <li class="nav-item">
+              <a class="nav-link" href="/auth/login">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Login
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/auth/register">
+                <i class="bi bi-person-plus me-1"></i> Register
+              </a>
+            </li>
+          <% } %>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  
+  <!-- Flash Messages -->
+  <div class="container-fluid mt-3">
+    <% if (messages.success && messages.success.length > 0) { %>
+      <div class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i> <%= messages.success %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% } %>
+    <% if (messages.error && messages.error.length > 0) { %>
+      <div class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i> <%= messages.error %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+      </div>
+    <% } %>
+  </div>
+  
+  <!-- Main Content Area -->
+  <div class="container-fluid mt-3">
+    <%- body %>
+  </div>
+  
+  <!-- Footer -->
+  <footer class="bg-dark text-white py-4 mt-5">
+    <div class="container">
+      <div class="row">
+        <div class="col-md-4 mb-4 mb-md-0">
+          <h5 class="mb-3">Cricket Auction System</h5>
+          <p class="mb-0">A complete solution for managing cricket player auctions with real-time bidding and team management.</p>
+          <div class="mt-3">
+            <a href="#" class="text-white me-2"><i class="bi bi-facebook"></i></a>
+            <a href="#" class="text-white me-2"><i class="bi bi-twitter"></i></a>
+            <a href="#" class="text-white me-2"><i class="bi bi-instagram"></i></a>
+            <a href="#" class="text-white"><i class="bi bi-linkedin"></i></a>
+          </div>
+        </div>
+        
+        <div class="col-md-2 mb-4 mb-md-0">
+          <h5 class="mb-3">Quick Links</h5>
+          <ul class="list-unstyled">
+            <li class="mb-2"><a href="/" class="text-white">Home</a></li>
+            <li class="mb-2"><a href="/auth/login" class="text-white">Login</a></li>
+            <li class="mb-2"><a href="/auth/register" class="text-white">Register</a></li>
+            <li><a href="#" class="text-white">Help Center</a></li>
+          </ul>
+        </div>
+        
+        <div class="col-md-3 mb-4 mb-md-0">
+          <h5 class="mb-3">Features</h5>
+          <ul class="list-unstyled">
+            <li class="mb-2"><a href="#" class="text-white">Player Management</a></li>
+            <li class="mb-2"><a href="#" class="text-white">Team Registration</a></li>
+            <li class="mb-2"><a href="#" class="text-white">Live Auction</a></li>
+            <li><a href="#" class="text-white">Real-time Bidding</a></li>
+          </ul>
+        </div>
+        
+        <div class="col-md-3">
+          <h5 class="mb-3">Contact Us</h5>
+          <ul class="list-unstyled">
+            <li class="mb-2"><i class="bi bi-envelope me-2"></i> info@cricketauction.com</li>
+            <li class="mb-2"><i class="bi bi-telephone me-2"></i> +1 (555) 123-4567</li>
+            <li><i class="bi bi-geo-alt me-2"></i> 123 Cricket Stadium, Sports City</li>
+          </ul>
+          
+          <h5 class="mt-4 mb-3">Subscribe to Newsletter</h5>
+          <form>
+            <div class="input-group mb-3">
+              <input type="email" class="form-control" placeholder="Your email" required>
+              <button class="btn btn-primary" type="submit">Subscribe</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      
+      <hr class="bg-white my-4">
+      
+      <div class="row align-items-center">
+        <div class="col-md-6">
+          <p class="mb-0">&copy; 2023 Cricket Auction System. All rights reserved.</p>
+        </div>
+        <div class="col-md-6 text-md-end">
+          <ul class="list-inline mb-0">
+            <li class="list-inline-item"><a href="#" class="text-white">Privacy Policy</a></li>
+            <li class="list-inline-item"><a href="#" class="text-white">Terms of Service</a></li>
+            <li class="list-inline-item"><a href="#" class="text-white">Cookie Policy</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </footer>
+  
+  <!-- Bootstrap JS Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <!-- Socket.IO -->
+  <script src="/socket.io/socket.io.js"></script>
+  <!-- Custom JS -->
+  <script src="/js/main.js"></script>
+</body>
+</html>

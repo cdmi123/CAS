@@ -1,0 +1,66 @@
+<div class="row justify-content-center">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header bg-success text-white">
+        <h4>Register</h4>
+      </div>
+      <div class="card-body">
+        <% if (messages.error && messages.error.length > 0) { %>
+          <div class="alert alert-danger"><%= messages.error %></div>
+        <% } %>
+        <form action="/auth/register" method="POST">
+          <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" name="username" required>
+          </div>
+          <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email" required>
+          </div>
+          <div class="mb-3">
+            <label for="password" class="form-label">Password</label>
+            <input type="password" class="form-control" id="password" name="password" required>
+          </div>
+          <div class="mb-3">
+            <label for="role" class="form-label">Register as</label>
+            <select class="form-select" id="role" name="role" required>
+              <option value="team">Team Owner</option>
+              <option value="admin">Administrator</option>
+            </select>
+          </div>
+          <div id="teamFields" class="mb-3" style="display: none;">
+            <div class="mb-3">
+              <label for="teamName" class="form-label">Team Name</label>
+              <input type="text" class="form-control" id="teamName" name="teamName">
+            </div>
+            <div class="mb-3">
+              <label for="owner" class="form-label">Owner Name</label>
+              <input type="text" class="form-control" id="owner" name="owner">
+            </div>
+          </div>
+          <div class="d-grid">
+            <button type="submit" class="btn btn-success">Register</button>
+          </div>
+        </form>
+        <div class="mt-3 text-center">
+          <p>Already have an account? <a href="/auth/login">Login</a></p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('role').addEventListener('change', function() {
+    const teamFields = document.getElementById('teamFields');
+    if (this.value === 'team') {
+      teamFields.style.display = 'block';
+      document.getElementById('teamName').required = true;
+      document.getElementById('owner').required = true;
+    } else {
+      teamFields.style.display = 'none';
+      document.getElementById('teamName').required = false;
+      document.getElementById('owner').required = false;
+    }
+  });
+</script>

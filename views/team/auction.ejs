@@ -1,0 +1,321 @@
+<div class="row">
+  <div class="col-md-8">
+    <div class="card mb-4">
+      <div class="card-header bg-warning text-white">
+        <h4>Live Auction</h4>
+      </div>
+      <div class="card-body">
+        <% if (currentPlayer) { %>
+          <div class="row">
+            <div class="col-md-4 text-center">
+              <img src="<%= currentPlayer.image %>" alt="<%= currentPlayer.name %>" class="img-fluid rounded mb-3">
+            </div>
+            <div class="col-md-8">
+              <h3><%= currentPlayer.name %></h3>
+              <p class="mb-1"><strong>Role:</strong> <%= currentPlayer.role %></p>
+              <p class="mb-1"><strong>Base Price:</strong> ₹<%= currentPlayer.basePrice.toLocaleString() %></p>
+              <p class="mb-1"><strong>Current Bid:</strong> ₹<span id="currentBidAmount"><%= currentPlayer.currentBid.toLocaleString() %></span></p>
+              <p class="mb-1"><strong>Highest Bidder:</strong> <span id="highestBidder">None</span></p>
+              
+              <div class="mt-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <h5 id="timer">--:--</h5>
+                  </div>
+                </div>
+                
+                <div class="mb-3">
+                  <label for="bidAmount" class="form-label">Your Bid (₹)</label>
+                  <div class="input-group">
+                    <input type="number" class="form-control" id="bidAmount" min="<%= currentPlayer.currentBid + 50000 %>" value="<%= currentPlayer.currentBid + 50000 %>" max="<%= team.budget %>">
+                    <button class="btn btn-warning" id="placeBidBtn" <%= currentPlayer.highestBidder && currentPlayer.highestBidder.toString() === team._id.toString() ? 'disabled' : '' %>>
+                      Place Bid
+                    </button>
+                  </div>
+                  <div class="form-text">Minimum bid: ₹<%= (currentPlayer.currentBid + 50000).toLocaleString() %></div>
+                  <% if (currentPlayer.highestBidder && currentPlayer.highestBidder.toString() === team._id.toString()) { %>
+                    <div class="alert alert-info mt-2">You are the highest bidder</div>
+                  <% } %>
+                </div>
+                
+                <div class="progress mb-3" style="height: 20px;">
+                  <div class="progress-bar bg-success" role="progressbar" style="width: 0%;" id="budgetProgress">
+                    0%
+                  </div>
+                </div>
+                <small>Your Budget: ₹<span id="teamBudget"><%= team.budget.toLocaleString() %></span></small>
+              </div>
+            </div>
+          </div>
+        <% } else { %>
+          <div class="text-center py-5">
+            <h4>No auction in progress</h4>
+            <p class="text-muted">Waiting for admin to start the auction</p>
+            <div class="spinner-border text-warning" role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        <h5>Bidding History</h5>
+      </div>
+      <div class="card-body">
+        <div id="biddingHistory" style="max-height: 400px; overflow-y: auto;">
+          <div class="text-center py-3 text-muted">
+            No bids yet
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <div class="card mb-4">
+      <div class="card-header bg-success text-white">
+        <h5>Your Team</h5>
+      </div>
+      <div class="card-body">
+        <div class="d-flex align-items-center mb-3">
+          <img src="<%= team.logo %>" alt="<%= team.name %>" class="img-thumbnail me-3" style="max-width: 50px;">
+          <div>
+            <h6 class="mb-0"><%= team.name %></h6>
+            <small class="text-muted">Budget: ₹<%= team.budget.toLocaleString() %></small>
+          </div>
+        </div>
+        <div class="progress" style="height: 10px;">
+          <div class="progress-bar bg-success" role="progressbar" style="width: 0%;" id="teamBudgetProgress"></div>
+        </div>
+        <div class="d-flex justify-content-between mt-2">
+          <small>Spent: ₹<span id="amountSpent">0</span></small>
+          <small>Remaining: ₹<span id="amountRemaining"><%= team.budget.toLocaleString() %></span></small>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Result Modal -->
+<div class="modal fade" id="resultModal" tabindex="-1" aria-labelledby="resultModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-warning">
+        <h5 class="modal-title" id="resultModalLabel">Auction Result</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <p id="resultMessage"></p>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const socket = io();
+    const teamBudget = '<%= team.budget %>';
+    const teamId = '<%= team._id %>';
+    let currentPlayer = null;
+    let biddingHistory = [];
+    
+    // Join auction room
+    socket.emit('joinAuction');
+    
+    // Listen for auction start
+    socket.on('auctionStarted', function(data) {
+      currentPlayer = data;
+      
+      // Update UI
+      document.querySelector('.card-body img').src = data.playerImage;
+      document.querySelector('.card-body h3').textContent = data.playerName;
+      document.querySelector('.card-body p:nth-child(2)').innerHTML = `<strong>Role:</strong> ${data.playerRole}`;
+      document.querySelector('.card-body p:nth-child(3)').innerHTML = `<strong>Base Price:</strong> ₹${parseInt(data.playerBasePrice).toLocaleString()}`;
+      document.getElementById('currentBidAmount').textContent = parseInt(data.playerBasePrice).toLocaleString();
+      document.getElementById('bidAmount').min = parseInt(data.playerBasePrice) + 50000;
+      document.getElementById('bidAmount').value = parseInt(data.playerBasePrice) + 50000;
+      document.getElementById('highestBidder').textContent = 'None';
+      
+      // Enable bid button
+      document.getElementById('placeBidBtn').disabled = false;
+      
+      // Reset bidding history
+      biddingHistory = [];
+      updateBiddingHistory();
+      
+      // Reset timer
+      document.getElementById('timer').textContent = '--:--';
+    });
+    
+    // Listen for new bids
+    socket.on('newBid', function(data) {
+      // Update current bid
+      document.getElementById('currentBidAmount').textContent = data.amount.toLocaleString();
+      document.getElementById('bidAmount').min = data.amount + 50000;
+      document.getElementById('bidAmount').value = data.amount + 50000;
+      
+      // Update highest bidder
+      document.getElementById('highestBidder').textContent = data.teamName;
+      
+      // Add to bidding history
+      const bidTime = new Date().toLocaleTimeString();
+      biddingHistory.unshift({
+        amount: data.amount,
+        teamName: data.teamName,
+        time: bidTime
+      });
+      
+      // Keep only last 10 bids
+      if (biddingHistory.length > 10) {
+        biddingHistory = biddingHistory.slice(0, 10);
+      }
+      
+      updateBiddingHistory();
+      
+      // Enable/disable bid button based on highest bidder
+      if (data.teamId === teamId) {
+        document.getElementById('placeBidBtn').disabled = true;
+        document.querySelector('.form-text').insertAdjacentHTML('afterend', 
+          '<div class="alert alert-info mt-2">You are the highest bidder</div>');
+      } else {
+        document.getElementById('placeBidBtn').disabled = false;
+        // Remove any existing alert
+        const existingAlert = document.querySelector('.alert-info');
+        if (existingAlert) {
+          existingAlert.remove();
+        }
+      }
+    });
+    
+    // Listen for player updates
+    socket.on('playerUpdated', function(data) {
+      // Update current bid
+      document.getElementById('currentBidAmount').textContent = data.currentBid.toLocaleString();
+      document.getElementById('bidAmount').min = data.currentBid + 50000;
+      document.getElementById('bidAmount').value = data.currentBid + 50000;
+      
+      // Enable/disable bid button based on highest bidder
+      if (data.highestBidder === teamId) {
+        document.getElementById('placeBidBtn').disabled = true;
+        document.querySelector('.form-text').insertAdjacentHTML('afterend', 
+          '<div class="alert alert-info mt-2">You are the highest bidder</div>');
+      } else {
+        document.getElementById('placeBidBtn').disabled = false;
+        // Remove any existing alert
+        const existingAlert = document.querySelector('.alert-info');
+        if (existingAlert) {
+          existingAlert.remove();
+        }
+      }
+    });
+    
+    // Listen for timer updates
+    socket.on('timerUpdated', function(timeLeft) {
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      document.getElementById('timer').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      // Disable bid button when time is up
+      if (timeLeft <= 0) {
+        document.getElementById('placeBidBtn').disabled = true;
+      }
+    });
+    
+    // Listen for auction end
+    socket.on('auctionEnded', function(data) {
+      let message = `Auction ended for ${data.playerName}! `;
+      if (data.sold) {
+        message += `Sold to ${data.teamName} for ₹${data.price.toLocaleString()}.`;
+      } else {
+        message += `No bids were placed.`;
+      }
+      
+      // Show result in a modal
+      const resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
+      document.getElementById('resultMessage').textContent = message;
+      resultModal.show();
+      
+      // Disable bid button
+      document.getElementById('placeBidBtn').disabled = true;
+    });
+    
+    // Listen for bid errors
+    socket.on('bidError', function(data) {
+      alert(data.message);
+    });
+    
+    // Place bid
+    document.getElementById('placeBidBtn').addEventListener('click', function() {
+      const playerId = currentPlayer ? currentPlayer.playerId : null;
+      const amount = parseInt(document.getElementById('bidAmount').value);
+      
+      if (!playerId) {
+        alert('No player in auction');
+        return;
+      }
+      
+      if (amount > teamBudget) {
+        alert('Insufficient budget');
+        return;
+      }
+      
+      socket.emit('placeBid', {
+        playerId,
+        teamId,
+        amount
+      });
+    });
+    
+    // Update bidding history UI
+    function updateBiddingHistory() {
+      const historyContainer = document.getElementById('biddingHistory');
+      
+      if (biddingHistory.length === 0) {
+        historyContainer.innerHTML = '<div class="text-center py-3 text-muted">No bids yet</div>';
+        return;
+      }
+      
+      let historyHTML = '';
+      biddingHistory.forEach(bid => {
+        historyHTML += `
+          <div class="card mb-2">
+            <div class="card-body p-2">
+              <div class="d-flex justify-content-between">
+                <span>${bid.teamName}</span>
+                <span class="badge bg-warning">₹${bid.amount.toLocaleString()}</span>
+              </div>
+              <small class="text-muted">${bid.time}</small>
+            </div>
+          </div>
+        `;
+      });
+      
+      historyContainer.innerHTML = historyHTML;
+    }
+    
+    // Update budget progress
+    function updateBudgetProgress(bidAmount) {
+      const spentElement = document.getElementById('amountSpent');
+      const remainingElement = document.getElementById('amountRemaining');
+      const progressElement = document.getElementById('budgetProgress');
+      const teamProgressElement = document.getElementById('teamBudgetProgress');
+      
+      const currentSpent = parseInt(spentElement.textContent.replace(',', '')) || 0;
+      const newSpent = currentSpent + bidAmount;
+      const remaining = teamBudget - newSpent;
+      const spentPercentage = (newSpent / teamBudget) * 100;
+      
+      spentElement.textContent = newSpent.toLocaleString();
+      remainingElement.textContent = remaining.toLocaleString();
+      progressElement.style.width = `${spentPercentage}%`;
+      progressElement.textContent = `${spentPercentage.toFixed(1)}%`;
+      teamProgressElement.style.width = `${spentPercentage}%`;
+    }
+  });
+</script>

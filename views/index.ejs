@@ -1,0 +1,45 @@
+<div class="row justify-content-center">
+  <div class="col-md-8 text-center">
+    <h1 class="mb-4">Cricket Auction System</h1>
+    <p class="lead">A complete solution for managing cricket player auctions</p>
+    
+    <div class="d-grid gap-3 col-md-6 mx-auto mt-5">
+      <a href="/auth/login" class="btn btn-primary btn-lg">Login</a>
+      <a href="/auth/register" class="btn btn-success btn-lg">Register</a>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-5">
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body text-center">
+        <i class="bi bi-person-badge fs-1 text-primary"></i>
+        <h3 class="card-title mt-3">Player Management</h3>
+        <p class="card-text">Add players with detailed statistics and manage their auction status</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body text-center">
+        <i class="bi bi-people fs-1 text-success"></i>
+        <h3 class="card-title mt-3">Team Management</h3>
+        <p class="card-text">Register teams, manage budgets, and track player acquisitions</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card h-100">
+      <div class="card-body text-center">
+        <i class="bi bi-hammer fs-1 text-warning"></i>
+        <h3 class="card-title mt-3">Live Auction</h3>
+        <p class="card-text">Real-time bidding system with live updates and auction controls</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const ensureAuthenticated = require('../middleware/auth');
+</script>

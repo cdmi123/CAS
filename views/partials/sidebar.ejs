@@ -1,0 +1,88 @@
+<aside><ul><li><a href='/'>Home</a></li></ul></aside><div class="col-md-3 col-lg-2 d-md-block bg-light sidebar collapse">
+  <div class="position-sticky pt-3">
+    <% if (user && user.role === 'admin') { %>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link <%= title === 'Admin Dashboard' ? 'active' : '' %>" href="/admin/dashboard">
+            <i class="bi bi-speedometer2 me-2"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= title === 'Players Management' ? 'active' : '' %><%= title === 'Add Player' ? ' active' : '' %>" href="/admin/players">
+            <i class="bi bi-people me-2"></i> Players
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= title === 'Teams Management' ? 'active' : '' %>" href="/admin/teams">
+            <i class="bi bi-shield-shaded me-2"></i> Teams
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= title === 'Auction Control' ? 'active' : '' %>" href="/admin/auction">
+            <i class="bi bi-hammer me-2"></i> Auction
+          </a>
+        </li>
+      </ul>
+      
+      <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+        <span>Quick Stats</span>
+      </h6>
+      <ul class="nav flex-column mb-2">
+        <li class="nav-item">
+          <div class="nav-link">
+            <i class="bi bi-person-badge me-2"></i> Total Players
+            <span class="badge bg-primary float-end">24</span>
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="nav-link">
+            <i class="bi bi-shield-check me-2"></i> Total Teams
+            <span class="badge bg-success float-end">8</span>
+          </div>
+        </li>
+        <li class="nav-item">
+          <div class="nav-link">
+            <i class="bi bi-check-circle me-2"></i> Sold Players
+            <span class="badge bg-warning float-end">12</span>
+          </div>
+        </li>
+      </ul>
+    <% } else if (user && user.role === 'team') { %>
+      <ul class="nav flex-column">
+        <li class="nav-item">
+          <a class="nav-link <%= title === 'Team Dashboard' ? 'active' : '' %>" href="/team/dashboard">
+            <i class="bi bi-speedometer2 me-2"></i> Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= title === 'Available Players' ? 'active' : '' %>" href="/team/players">
+            <i class="bi bi-people me-2"></i> Available Players
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= title === 'Live Auction' ? 'active' : '' %>" href="/team/auction">
+            <i class="bi bi-hammer me-2"></i> Live Auction
+          </a>
+        </li>
+      </ul>
+      
+      <h6 class="sidebar-heading d-flex justify-content-between align-items-center px-3 mt-4 mb-1 text-muted">
+        <span>Team Info</span>
+      </h6>
+      <div class="card mb-3 mx-3">
+        <div class="card-body text-center">
+          <h5 class="card-title">Team Name</h5>
+          <p class="card-text">Owner Name</p>
+          <div class="d-flex justify-content-between">
+            <span>Budget:</span>
+            <span class="fw-bold">₹10,000,000</span>
+          </div>
+          <div class="d-flex justify-content-between">
+            <span>Players:</span>
+            <span class="fw-bold">5</span>
+          </div>
+        </div>
+      </div>
+    <% } %>
+  </div>
+</div>

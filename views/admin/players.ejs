@@ -1,0 +1,57 @@
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2>Players Management</h2>
+  <a href="/admin/players/add" class="btn btn-primary">
+    <i class="bi bi-plus-circle"></i> Add Player
+  </a>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="table-responsive">
+      <table class="table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Role</th>
+            <th>Base Price</th>
+            <th>Current Bid</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% players.forEach(player => { %>
+            <tr>
+              <td><%= player.name %></td>
+              <td><%= player.role %></td>
+              <td>₹<%= player.basePrice.toLocaleString() %></td>
+              <td>₹<%= player.currentBid.toLocaleString() %></td>
+              <td>
+                <% if (player.status === 'sold') { %>
+                  <span class="badge bg-success">Sold</span>
+                <% } else if (player.status === 'in-auction') { %>
+                  <span class="badge bg-warning">In Auction</span>
+                <% } else { %>
+                  <span class="badge bg-secondary">Unsold</span>
+                <% } %>
+              </td>
+              <td>
+                <div class="btn-group btn-group-sm">
+                  <a href="#" class="btn btn-info">
+                    <i class="bi bi-eye"></i>
+                  </a>
+                  <a href="#" class="btn btn-warning">
+                    <i class="bi bi-pencil"></i>
+                  </a>
+                  <a href="#" class="btn btn-danger">
+                    <i class="bi bi-trash"></i>
+                  </a>
+                </div>
+              </td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

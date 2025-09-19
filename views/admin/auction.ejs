@@ -1,0 +1,241 @@
+<div class="row">
+  <div class="col-md-8">
+    <div class="card mb-4">
+      <div class="card-header bg-warning text-white">
+        <h4>Auction Control</h4>
+      </div>
+      <div class="card-body">
+        <% if (currentPlayer) { %>
+          <div class="row">
+            <div class="col-md-4 text-center">
+              <img src="<%= currentPlayer.image %>" alt="<%= currentPlayer.name %>" class="img-fluid rounded mb-3">
+            </div>
+            <div class="col-md-8">
+              <h3><%= currentPlayer.name %></h3>
+              <p class="mb-1"><strong>Role:</strong> <%= currentPlayer.role %></p>
+              <p class="mb-1"><strong>Base Price:</strong> ₹<%= currentPlayer.basePrice.toLocaleString() %></p>
+              <p class="mb-1"><strong>Current Bid:</strong> ₹<%= currentPlayer.currentBid.toLocaleString() %></p>
+              <p class="mb-1"><strong>Status:</strong> 
+                <% if (currentPlayer.status === 'sold') { %>
+                  <span class="badge bg-success">Sold</span>
+                <% } else if (currentPlayer.status === 'in-auction') { %>
+                  <span class="badge bg-warning">In Auction</span>
+                <% } else { %>
+                  <span class="badge bg-secondary">Unsold</span>
+                <% } %>
+              </p>
+              
+              <div class="mt-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <h5 id="timer">01:00</h5>
+                  </div>
+                  <div>
+                    <button id="startTimer" class="btn btn-success me-2">Start Timer</button>
+                    <button id="stopTimer" class="btn btn-danger">Stop Timer</button>
+                  </div>
+                </div>
+                
+                <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                  <button id="endAuction" class="btn btn-warning">End Auction</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        <% } else { %>
+          <div class="text-center py-5">
+            <h4>No player currently in auction</h4>
+            <p class="text-muted">Select a player from the list to start the auction</p>
+          </div>
+        <% } %>
+      </div>
+    </div>
+  </div>
+  
+  <div class="col-md-4">
+    <div class="card mb-4">
+      <div class="card-header bg-primary text-white">
+        <h5>Players</h5>
+        <div class="d-flex justify-content-between align-items-center">
+          <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" id="showUnsoldOnly" checked>
+            <label class="form-check-label" for="showUnsoldOnly">
+              Show unsold only
+            </label>
+          </div>
+          <button class="btn btn-sm btn-outline-light" id="refreshPlayerList">
+            <i class="bi bi-arrow-clockwise"></i> Refresh
+          </button>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="mb-3">
+          <input type="text" class="form-control" id="playerSearch" placeholder="Search players...">
+        </div>
+        <div class="player-list" style="max-height: 400px; overflow-y: auto;">
+          <% players.forEach(player => { %>
+            <div class="card mb-2 player-item" 
+                 data-player-id="<%= player._id %>" 
+                 data-player-name="<%= player.name %>" 
+                 data-player-role="<%= player.role %>" 
+                 data-player-base-price="<%= player.basePrice %>" 
+                 data-player-image="<%= player.image %>"
+                 data-player-status="<%= player.status %>">
+              <div class="card-body p-2">
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <h6 class="mb-0"><%= player.name %></h6>
+                    <small class="text-muted"><%= player.role %></small>
+                  </div>
+                  <div>
+                    <span class="badge <%= player.status === 'sold' ? 'bg-success' : player.status === 'in-auction' ? 'bg-warning' : 'bg-secondary' %>">
+                      <%= player.status === 'sold' ? 'Sold' : player.status === 'in-auction' ? 'In Auction' : 'Unsold' %>
+                    </span>
+                    <span class="badge bg-secondary ms-1">₹<%= player.basePrice.toLocaleString() %></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          <% }); %>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const socket = io();
+    let timerInterval;
+    let timeLeft = 60; // 60 seconds
+    
+    // Join auction room
+    socket.emit('joinAuction');
+    
+    // Listen for player list updates
+    socket.on('playerListUpdated', function() {
+      refreshPlayerList();
+    });
+    
+    // Start auction for a player
+    document.querySelectorAll('.player-item').forEach(item => {
+      item.addEventListener('click', function() {
+        const playerId = this.getAttribute('data-player-id');
+        const playerName = this.getAttribute('data-player-name');
+        const playerRole = this.getAttribute('data-player-role');
+        const playerBasePrice = this.getAttribute('data-player-base-price');
+        const playerImage = this.getAttribute('data-player-image');
+        
+        socket.emit('startAuction', {
+          playerId
+        });
+      });
+    });
+    
+    // Timer controls
+    document.getElementById('startTimer').addEventListener('click', function() {
+      if (!timerInterval) {
+        timerInterval = setInterval(updateTimer, 1000);
+      }
+    });
+    
+    document.getElementById('stopTimer').addEventListener('click', function() {
+      clearInterval(timerInterval);
+      timerInterval = null;
+    });
+    
+    function updateTimer() {
+      timeLeft--;
+      const minutes = Math.floor(timeLeft / 60);
+      const seconds = timeLeft % 60;
+      document.getElementById('timer').textContent = 
+        `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+      
+      socket.emit('timerUpdate', timeLeft);
+      
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        document.getElementById('endAuction').click();
+      }
+    }
+    
+    // End auction
+    document.getElementById('endAuction').addEventListener('click', function() {
+      socket.emit('endAuction');
+    });
+    
+    // Player search
+    document.getElementById('playerSearch').addEventListener('input', function() {
+      const searchTerm = this.value.toLowerCase();
+      document.querySelectorAll('.player-item').forEach(item => {
+        const playerName = item.getAttribute('data-player-name').toLowerCase();
+        if (playerName.includes(searchTerm)) {
+          item.style.display = 'block';
+        } else {
+          item.style.display = 'none';
+        }
+      });
+    });
+    
+    // Show unsold only toggle
+    document.getElementById('showUnsoldOnly').addEventListener('change', function() {
+      filterPlayerList();
+    });
+    
+    // Refresh player list
+    document.getElementById('refreshPlayerList').addEventListener('click', function() {
+      refreshPlayerList();
+    });
+    
+    function filterPlayerList() {
+      const showUnsoldOnly = document.getElementById('showUnsoldOnly').checked;
+      
+      document.querySelectorAll('.player-item').forEach(item => {
+        const status = item.getAttribute('data-player-status');
+        if (showUnsoldOnly && status !== 'unsold') {
+          item.style.display = 'none';
+        } else {
+          item.style.display = 'block';
+        }
+      });
+    }
+    
+    function refreshPlayerList() {
+      fetch('/admin/auction')
+        .then(response => response.text())
+        .then(html => {
+          // Create a temporary DOM element to parse the HTML
+          const tempDiv = document.createElement('div');
+          tempDiv.innerHTML = html;
+          
+          // Extract the player list from the response
+          const newPlayerList = tempDiv.querySelector('.player-list');
+          
+          // Replace the current player list with the new one
+          document.querySelector('.player-list').innerHTML = newPlayerList.innerHTML;
+          
+          // Re-attach event listeners
+          document.querySelectorAll('.player-item').forEach(item => {
+            item.addEventListener('click', function() {
+              const playerId = this.getAttribute('data-player-id');
+              const playerName = this.getAttribute('data-player-name');
+              const playerRole = this.getAttribute('data-player-role');
+              const playerBasePrice = this.getAttribute('data-player-base-price');
+              const playerImage = this.getAttribute('data-player-image');
+              
+              socket.emit('startAuction', {
+                playerId
+              });
+            });
+          });
+          
+          // Apply current filter
+          filterPlayerList();
+        })
+        .catch(error => {
+          console.error('Error refreshing player list:', error);
+        });
+    }
+  });
+</script>

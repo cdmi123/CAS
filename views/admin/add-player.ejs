@@ -1,0 +1,75 @@
+<div class="row justify-content-center">
+  <div class="col-md-8">
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        <h4>Add New Player</h4>
+      </div>
+      <div class="card-body">
+        <form action="/admin/players/add" method="POST" enctype="multipart/form-data">
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="name" class="form-label">Player Name</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="role" class="form-label">Role</label>
+                <select class="form-select" id="role" name="role" required>
+                  <option value="Batsman">Batsman</option>
+                  <option value="Bowler">Bowler</option>
+                  <option value="All-Rounder">All-Rounder</option>
+                  <option value="Wicket-Keeper">Wicket-Keeper</option>
+                </select>
+              </div>
+            </div>
+          </div>
+          
+          <div class="row">
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="basePrice" class="form-label">Base Price (₹)</label>
+                <input type="number" class="form-control" id="basePrice" name="basePrice" required>
+              </div>
+            </div>
+            <div class="col-md-6">
+              <div class="mb-3">
+                <label for="image" class="form-label">Player Image</label>
+                <input type="file" class="form-control" id="image" name="image">
+              </div>
+            </div>
+          </div>
+          
+          <h5 class="mt-4 mb-3">Player Statistics</h5>
+          
+          <div class="row">
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label for="matches" class="form-label">Matches</label>
+                <input type="number" class="form-control" id="matches" name="matches" min="0">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label for="runs" class="form-label">Runs</label>
+                <input type="number" class="form-control" id="runs" name="runs" min="0">
+              </div>
+            </div>
+            <div class="col-md-4">
+              <div class="mb-3">
+                <label for="wickets" class="form-label">Wickets</label>
+                <input type="number" class="form-control" id="wickets" name="wickets" min="0">
+              </div>
+            </div>
+          </div>
+          
+          <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+            <a href="/admin/players" class="btn btn-secondary">Cancel</a>
+            <button type="submit" class="btn btn-primary">Add Player</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
