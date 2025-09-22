@@ -1,19 +1,29 @@
 <div class="container py-4">
   <div class="d-flex justify-content-between align-items-center mb-4">
     <h2 class="fw-bold text-primary"><i class="bi bi-person-lines-fill me-2"></i>Players Management</h2>
-    <div class="d-flex gap-2">
-    <form action="/admin/players/upload-excel" method="POST" enctype="multipart/form-data" class="d-flex align-items-center gap-2">
-      <input type="file" name="excel" accept=".xlsx,.xls" class="form-control form-control-sm" required>
-      <button type="submit" class="btn btn-dark btn-lg">
-        <i class="bi bi-upload"></i> Upload Excel
-      </button>
-    </form>
+    <div class="d-flex gap-2 align-items-center">
+      <form action="/admin/players/upload-excel" method="POST" enctype="multipart/form-data" class="d-flex align-items-center gap-2">
+        <input type="file" name="excel" accept=".xlsx,.xls" class="form-control form-control-sm" required>
+        <button type="submit" class="btn btn-dark btn-lg">
+          <i class="bi bi-upload"></i> Upload Excel
+        </button>
+      </form>
       <a href="/admin/players/add" class="btn btn-primary btn-lg">
         <i class="bi bi-plus-circle"></i> Add Player
       </a>
       <a href="/admin/players/download-excel" class="btn btn-success btn-lg">
         <i class="bi bi-file-earmark-excel"></i> Download Excel
       </a>
+      <div class="d-flex gap-2 align-items-center ms-3">
+        <input type="checkbox" id="selectAllPlayers" class="form-check-input">
+        <label for="selectAllPlayers" class="form-check-label">Select All</label>
+        <button id="selectAllBtn" class="btn btn-secondary btn-lg" type="button">
+          <i class="bi bi-check2-square"></i> Select All
+        </button>
+        <button id="deleteSelectedBtn" class="btn btn-danger btn-lg" disabled>
+          <i class="bi bi-trash"></i> Delete Selected
+        </button>
+      </div>
     </div>
   </div>
   <div class="row mb-4">
@@ -47,6 +57,10 @@
       <div class="col-12 col-sm-6 col-md-4 col-lg-3">
         <div class="card h-100 border-0 rounded-4 shadow-lg" style="background: #fff;">
           <div class="card-body d-flex flex-column justify-content-between p-3">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <input type="checkbox" class="form-check-input player-checkbox" value="<%= player._id %>" style="margin-right: 8px;">
+              <span class="small text-muted">Select</span>
+            </div>
             <div class="text-center mb-2">
               <img src="<%= player.image || '/images/default-player.png' %>" alt="<%= player.name %>" class="rounded-circle border border-3 border-light mb-2" style="width: 70px; height: 70px; object-fit: cover; box-shadow: 0 2px 8px rgba(0,0,0,0.10);">
               <h6 class="fw-bold text-dark mb-1"><%= player.name %></h6>
@@ -79,3 +93,64 @@
 </div>
 
 <!-- View/Edit Modal -->
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const selectAll = document.getElementById('selectAllPlayers');
+  const selectAllBtn = document.getElementById('selectAllBtn');
+  const checkboxes = document.querySelectorAll('.player-checkbox');
+  const deleteBtn = document.getElementById('deleteSelectedBtn');
+
+  function updateDeleteBtn() {
+    const anyChecked = Array.from(checkboxes).some(cb => cb.checked);
+    deleteBtn.disabled = !anyChecked;
+  }
+
+  selectAll.addEventListener('change', function() {
+    checkboxes.forEach(cb => {
+      cb.checked = selectAll.checked;
+    });
+    updateDeleteBtn();
+  });
+
+  selectAllBtn.addEventListener('click', function() {
+    checkboxes.forEach(cb => {
+      cb.checked = true;
+    });
+    selectAll.checked = true;
+    updateDeleteBtn();
+  });
+
+  checkboxes.forEach(cb => {
+    cb.addEventListener('change', function() {
+      if (!cb.checked) selectAll.checked = false;
+      else if (Array.from(checkboxes).every(c => c.checked)) selectAll.checked = true;
+      updateDeleteBtn();
+    });
+  });
+
+  deleteBtn.addEventListener('click', function(e) {
+    e.preventDefault();
+    const selectedIds = Array.from(checkboxes).filter(cb => cb.checked).map(cb => cb.value);
+    if (selectedIds.length === 0) return;
+    if (!confirm('Are you sure you want to delete the selected players?')) return;
+    fetch('/admin/players/delete-multiple', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
+      body: JSON.stringify({ ids: selectedIds })
+    })
+    .then(res => res.json())
+    .then(data => {
+      if (data.success) {
+        window.location.reload();
+      } else {
+        alert('Failed to delete selected players');
+      }
+    })
+    .catch(() => alert('Error deleting selected players'));
+  });
+});
+</script>

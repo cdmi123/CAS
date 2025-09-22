@@ -3,6 +3,10 @@ exports.uploadPlayersExcel = async (req, res) => {
   const Player = require('../models/Player');
   try {
     if (!req.file) return res.status(400).send('No file uploaded');
+    // Validate file type
+    if (!req.file.originalname.match(/\.(xlsx)$/)) {
+      return res.status(400).send('Only .xlsx files are allowed!');
+    }
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(req.file.path);
     const worksheet = workbook.worksheets[0];

@@ -50,6 +50,9 @@ router.post('/players/update/:id', ensureAuthenticated, adminAuth, adminControll
 // Delete player
 router.post('/players/delete/:id', ensureAuthenticated, adminAuth, adminController.deletePlayer);
 
+// Bulk delete players
+router.post('/players/delete-multiple', ensureAuthenticated, adminAuth, adminController.deleteMultiplePlayers);
+
 
 // Teams list
 router.get('/teams', ensureAuthenticated, adminAuth, adminController.getTeams);

@@ -1,3 +1,17 @@
+// Bulk delete players
+exports.deleteMultiplePlayers = async (req, res) => {
+  try {
+    const ids = req.body.ids;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return res.json({ success: false, message: 'No player IDs provided' });
+    }
+    await Player.deleteMany({ _id: { $in: ids } });
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Error deleting players' });
+  }
+};
 const multer = require('multer');
 const path = require('path');
 const upload = multer({
