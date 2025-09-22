@@ -10,6 +10,14 @@ const teamSchema = new mongoose.Schema({
     type: String,
     required: true
   },
+  ownerEmail: {
+    type: String,
+    required: false
+  },
+  ownerPhone: {
+    type: String,
+    required: false
+  },
   budget: {
     type: Number,
     default: 10000000

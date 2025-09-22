@@ -1,0 +1,39 @@
+<div class="container mt-4">
+  <h2 class="fw-bold text-primary mb-4"><i class="bi bi-calendar-plus me-2"></i>Schedule Auction</h2>
+  <form action="/admin/schedule-auction" method="POST" class="card p-4 shadow-sm mb-4">
+    <div class="mb-3">
+      <label for="player" class="form-label">Select Player</label>
+      <select name="player" id="player" class="form-select" required>
+        <% players.forEach(function(p) { %>
+          <option value="<%= p._id %>"><%= p.name %> (<%= p.role %>)</option>
+        <% }) %>
+      </select>
+    </div>
+    <div class="mb-3">
+      <label for="scheduledFor" class="form-label">Auction Date & Time</label>
+      <input type="datetime-local" name="scheduledFor" id="scheduledFor" class="form-control" required>
+    </div>
+    <button type="submit" class="btn btn-primary"><i class="bi bi-calendar-plus me-1"></i>Schedule Auction</button>
+  </form>
+  <div class="card p-3">
+    <h5 class="mb-3">Upcoming Scheduled Auctions</h5>
+    <table class="table table-bordered table-hover align-middle">
+      <thead class="table-light">
+        <tr>
+          <th>Player</th>
+          <th>Date & Time</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% auctions.forEach(function(a) { %>
+          <tr>
+            <td><%= a.player.name %></td>
+            <td><%= new Date(a.scheduledFor).toLocaleString() %></td>
+            <td><span class="badge bg-<%= a.status === 'scheduled' ? 'info' : a.status === 'in-auction' ? 'warning' : a.status === 'completed' ? 'success' : 'secondary' %>"><%= a.status %></span></td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </div>
+</div>

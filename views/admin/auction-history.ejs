@@ -1,0 +1,49 @@
+</div>
+<script src="/socket.io/socket.io.js"></script>
+<script>
+  const socket = io();
+  socket.on('newBid', function(data) {
+    fetch('/admin/auction-history/data')
+      .then(res => res.json())
+      .then(bids => {
+        const tbody = document.querySelector('tbody');
+        tbody.innerHTML = bids.map(bid => `
+          <tr>
+            <td>${bid.player.name}</td>
+            <td>${bid.team.name}</td>
+            <td>₹${bid.amount.toLocaleString()}</td>
+            <td>${new Date(bid.timestamp).toLocaleString()}</td>
+          </tr>
+        `).join('');
+      });
+  });
+</script>
+<div class="container-fluid mt-4">
+  <div class="row mb-4">
+    <div class="col-12">
+      <h2 class="fw-bold text-primary mb-3"><i class="bi bi-clock-history me-2"></i>Auction History Report</h2>
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Player</th>
+              <th>Team</th>
+              <th>Amount</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% bids.forEach(bid => { %>
+              <tr>
+                <td><%= bid.player.name %></td>
+                <td><%= bid.team.name %></td>
+                <td>₹<%= bid.amount.toLocaleString() %></td>
+                <td><%= new Date(bid.timestamp).toLocaleString() %></td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

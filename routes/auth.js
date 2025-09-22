@@ -7,6 +7,22 @@ const Team = require('../models/Team');
 
 // Login page
 router.get('/login', (req, res) => {
+  const token = req.cookies.token;
+  if (token) {
+    try {
+      const jwt = require('jsonwebtoken');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      // Redirect based on role
+      if (decoded.role === 'admin') {
+        return res.redirect('/admin/dashboard');
+      } else if (decoded.role === 'team') {
+        return res.redirect('/team/dashboard');
+      }
+    } catch (err) {
+      // Invalid token, clear cookie and show login
+      res.clearCookie('token');
+    }
+  }
   res.render('auth/login', { title: 'Login' });
 });
 

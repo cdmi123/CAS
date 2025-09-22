@@ -35,8 +35,24 @@ app.use(session({
   cookie: { secure: false } // Set to true in production with HTTPS
 }));
 // Make user available in all views
-app.use((req, res, next) => {
-  res.locals.user = req.user || null;
+app.use(async (req, res, next) => {
+  const token = req.cookies.token;
+  if (token) {
+    try {
+      const jwt = require('jsonwebtoken');
+      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const User = require('./models/User');
+      const user = await User.findById(decoded.id).select('-password');
+      res.locals.user = user;
+      req.user = user;
+    } catch (err) {
+      res.locals.user = null;
+      req.user = null;
+    }
+  } else {
+    res.locals.user = null;
+    req.user = null;
+  }
   next();
 });
 
@@ -46,6 +62,8 @@ app.use(expressEjsLayouts);
 
 // Set static folder
 app.use(express.static(path.join(__dirname, 'public')));
+// Serve uploads folder for team logos
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Set view engine
 app.set('view engine', 'ejs');
@@ -84,6 +102,7 @@ require('./sockets/auction')(io);
 // Error handling
 app.use((req, res) => {
   res.status(404).render('errors/404', {
+    title: 'Error',
     message: 'Page not found'
   });
 });

@@ -1,0 +1,81 @@
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8">
+      <div class="card shadow-lg border-0">
+        <div class="card-header bg-primary text-white text-center py-3">
+          <h3 class="mb-0">Add Team</h3>
+        </div>
+        <div class="card-body p-4">
+          <form action="/admin/teams/add" method="POST" enctype="multipart/form-data">
+            <div class="row g-3">
+              <div class="col-12 col-md-6">
+                <label for="name" class="form-label">Team Name</label>
+                <input type="text" class="form-control form-control-lg" id="name" name="name" required>
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="owner" class="form-label">Owner Name</label>
+                <input type="text" class="form-control form-control-lg" id="owner" name="owner" required>
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="ownerEmail" class="form-label">Owner Email</label>
+                <input type="email" class="form-control form-control-lg" id="ownerEmail" name="ownerEmail" required>
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="ownerPhone" class="form-label">Owner Phone</label>
+                <input type="tel" class="form-control form-control-lg" id="ownerPhone" name="ownerPhone" pattern="[0-9]{10}" required>
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="budget" class="form-label">Budget</label>
+                <input type="number" class="form-control form-control-lg" id="budget" name="budget" min="0" required>
+              </div>
+              <div class="col-12 col-md-6">
+                <label for="logo" class="form-label">Team Logo</label>
+                <input type="file" class="form-control form-control-lg" id="logo" name="logo" accept="image/*" onchange="previewLogoBase64(event)">
+                <img id="logoPreview" src="" alt="Logo Preview" class="img-thumbnail mt-2" style="max-width: 120px; display: none;">
+              </div>
+              <div class="col-12">
+                <label for="captain" class="form-label">Select Captain</label>
+                <select class="form-select form-select-lg" id="captain" name="captain" required onchange="showPlayerImageBase64()">
+                  <option value="">Choose a player...</option>
+                  <% if (typeof players !== 'undefined' && players.length > 0) { %>
+                    <% players.forEach(function(player) { %>
+                      <option value="<%= player._id %>" data-img="<%= player.image %>"><%= player.name %> (<%= player.role %>)</option>
+                    <% }); %>
+                  <% } %>
+                </select>
+                <img id="playerImagePreview" src="" alt="Player Image" class="img-thumbnail mt-2" style="max-width: 120px; display: none;">
+              </div>
+            </div>
+            <button type="submit" class="btn btn-success w-100 mt-4 py-2 fs-5">Add Team</button>
+          </form>
+          <script>
+            function previewLogoBase64(event) {
+              const file = event.target.files[0];
+              if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                  document.getElementById('logoPreview').src = e.target.result;
+                  document.getElementById('logoPreview').style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+              }
+            }
+            function showPlayerImageBase64() {
+              var select = document.getElementById('captain');
+              var img = document.getElementById('playerImagePreview');
+              var selected = select.options[select.selectedIndex];
+              var imgUrl = selected.getAttribute('data-img');
+              if (imgUrl && imgUrl.startsWith('data:image')) {
+                img.src = imgUrl;
+                img.style.display = 'block';
+              } else {
+                img.style.display = 'none';
+              }
+            }
+          </script>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

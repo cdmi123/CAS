@@ -1,0 +1,21 @@
+Name	Role	Base Price	Status	Image URL
+Player 1	Batsman	50000	unsold	https://example.com/image1.jpg
+Player 2	Bowler	52000	unsold	https://example.com/image2.jpg
+Player 3	All-Rounder	54000	unsold	https://example.com/image3.jpg
+Player 4	Wicket-Keeper	56000	unsold	https://example.com/image4.jpg
+Player 5	Batsman	58000	unsold	https://example.com/image5.jpg
+Player 6	Bowler	60000	unsold	https://example.com/image6.jpg
+Player 7	All-Rounder	62000	unsold	https://example.com/image7.jpg
+Player 8	Wicket-Keeper	64000	unsold	https://example.com/image8.jpg
+Player 9	Batsman	66000	unsold	https://example.com/image9.jpg
+Player 10	Bowler	68000	unsold	https://example.com/image10.jpg
+Player 11	All-Rounder	70000	unsold	https://example.com/image11.jpg
+Player 12	Wicket-Keeper	72000	unsold	https://example.com/image12.jpg
+Player 13	Batsman	74000	unsold	https://example.com/image13.jpg
+Player 14	Bowler	76000	unsold	https://example.com/image14.jpg
+Player 15	All-Rounder	78000	unsold	https://example.com/image15.jpg
+Player 16	Wicket-Keeper	80000	unsold	https://example.com/image16.jpg
+Player 17	Batsman	82000	unsold	https://example.com/image17.jpg
+Player 18	Bowler	84000	unsold	https://example.com/image18.jpg
+Player 19	All-Rounder	86000	unsold	https://example.com/image19.jpg
+Player 20	Wicket-Keeper	88000	unsold	https://example.com/image20.jpg

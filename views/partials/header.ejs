@@ -14,83 +14,59 @@
 </head>
 <body>
   <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+  <nav class="navbar navbar-expand-lg navbar-light sticky-top">
     <div class="container-fluid">
       <a class="navbar-brand d-flex align-items-center" href="/">
         <i class="bi bi-trophy-fill me-2"></i>
         <span class="fw-bold">Cricket Auction</span>
       </a>
       
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       
       <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav me-auto">
+        <ul class="navbar-nav me-auto mb-2 mb-lg-0">
           <% if (user && user.role === 'admin') { %>
-            <li class="nav-item">
-              <a class="nav-link <%= title === 'Admin Dashboard' ? 'active' : '' %>" href="/admin/dashboard">
-                <i class="bi bi-speedometer2 me-1"></i> Dashboard
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link <%= title === 'Players Management' ? 'active' : '' %>" href="/admin/players">
-                <i class="bi bi-people me-1"></i> Players
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link <%= title === 'Teams Management' ? 'active' : '' %>" href="/admin/teams">
-                <i class="bi bi-shield-shaded me-1"></i> Teams
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link <%= title === 'Auction Control' ? 'active' : '' %>" href="/admin/auction">
-                <i class="bi bi-hammer me-1"></i> Auction
-              </a>
-            </li>
+            <li class="nav-item"><a class="nav-link <%= title === 'Admin Dashboard' ? 'active' : '' %>" href="/admin/dashboard"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link <%= title === 'Players Management' ? 'active' : '' %>" href="/admin/players"><i class="bi bi-people me-1"></i> Players</a></li>
+            <li class="nav-item"><a class="nav-link <%= title === 'Teams Management' ? 'active' : '' %>" href="/admin/teams"><i class="bi bi-shield-shaded me-1"></i> Teams</a></li>
+            <li class="nav-item"><a class="nav-link <%= title === 'Auction Control' ? 'active' : '' %>" href="/admin/auction"><i class="bi bi-hammer me-1"></i> Auction</a></li>
           <% } else if (user && user.role === 'team') { %>
-            <li class="nav-item">
-              <a class="nav-link <%= title === 'Team Dashboard' ? 'active' : '' %>" href="/team/dashboard">
-                <i class="bi bi-speedometer2 me-1"></i> Dashboard
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link <%= title === 'Available Players' ? 'active' : '' %>" href="/team/players">
-                <i class="bi bi-people me-1"></i> Players
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link <%= title === 'Live Auction' ? 'active' : '' %>" href="/team/auction">
-                <i class="bi bi-hammer me-1"></i> Auction
-              </a>
-            </li>
+            <li class="nav-item"><a class="nav-link <%= title === 'Team Dashboard' ? 'active' : '' %>" href="/team/dashboard"><i class="bi bi-speedometer2 me-1"></i> Dashboard</a></li>
+            <li class="nav-item"><a class="nav-link <%= title === 'Available Players' ? 'active' : '' %>" href="/team/players"><i class="bi bi-people me-1"></i> Players</a></li>
+            <li class="nav-item"><a class="nav-link <%= title === 'Live Auction' ? 'active' : '' %>" href="/team/auction"><i class="bi bi-hammer me-1"></i> Auction</a></li>
+          <% } else { %>
+            <li class="nav-item"><a class="nav-link <%= title === 'Home' ? 'active' : '' %>" href="/"><i class="bi bi-house me-1"></i> Home</a></li>
+            <li class="nav-item"><a class="nav-link" href="/team/players"><i class="bi bi-people me-1"></i> Players</a></li>
+            <li class="nav-item"><a class="nav-link" href="/team/auction"><i class="bi bi-hammer me-1"></i> Auction</a></li>
           <% } %>
         </ul>
         
         <ul class="navbar-nav">
           <% if (user) { %>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                <i class="bi bi-person-circle me-1"></i>
-                <%= user.username %>
-              </a>
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="/auth/logout">
-                  <i class="bi bi-box-arrow-right me-2"></i> Logout
-                </a></li>
-              </ul>
-            </li>
+              <li class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                  <i class="bi bi-person-circle me-1"></i>
+                  <%= user.username %>
+                </a>
+                <ul class="dropdown-menu dropdown-menu-end">
+                  <li><a class="dropdown-item" href="/auth/logout">
+                    <i class="bi bi-box-arrow-right me-2"></i> Logout
+                  </a></li>
+                </ul>
+              </li>
           <% } else { %>
-            <li class="nav-item">
-              <a class="nav-link" href="/auth/login">
-                <i class="bi bi-box-arrow-in-right me-1"></i> Login
-              </a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="/auth/register">
-                <i class="bi bi-person-plus me-1"></i> Register
-              </a>
-            </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/auth/login">
+                  <i class="bi bi-box-arrow-in-right me-1"></i> Login
+                </a>
+              </li>
+              <li class="nav-item">
+                <a class="nav-link" href="/auth/register">
+                  <i class="bi bi-person-plus me-1"></i> Register
+                </a>
+              </li>
           <% } %>
         </ul>
       </div>

@@ -1,3 +1,157 @@
+const multer = require('multer');
+const path = require('path');
+const upload = multer({
+  dest: path.join(__dirname, '../uploads'),
+  limits: { fileSize: 2 * 1024 * 1024 }, // 2MB
+  fileFilter: (req, file, cb) => {
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(new Error('Only image files are allowed!'), false);
+    }
+    cb(null, true);
+  }
+});
+
+exports.editTeam = [upload.single('logo'), async (req, res) => {
+  try {
+  const { name, owner, budget, logo, ownerEmail, ownerPhone } = req.body;
+    if (!name || !owner || !budget) {
+      return res.json({ success: false, message: 'Missing required fields' });
+    }
+    const team = await Team.findById(req.params.id);
+    if (!team) {
+      return res.json({ success: false, message: 'Team not found' });
+    }
+    team.name = name;
+    team.owner = owner;
+    team.budget = Number(budget);
+    if (req.file) {
+      team.logo = '/uploads/' + req.file.filename;
+    } else if (logo) {
+      team.logo = logo;
+    }
+    if (ownerEmail) team.ownerEmail = ownerEmail;
+    if (ownerPhone) team.ownerPhone = ownerPhone;
+    await team.save();
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Error updating team' });
+  }
+}];
+
+// Delete team
+exports.deleteTeam = async (req, res) => {
+  try {
+    await Team.findByIdAndDelete(req.params.id);
+    res.json({ success: true });
+  } catch (err) {
+    console.error(err);
+    res.json({ success: false, message: 'Error deleting team' });
+  }
+};
+// Add team page
+exports.getTeamAdd = async (req, res) => {
+  try {
+    const Player = require('../models/Player');
+    const players = await Player.find({ status: 'unsold' });
+    res.render('admin/add-team', {
+      title: 'Add Team',
+      players
+    });
+  } catch (err) {
+    console.error(err);
+    res.render('admin/add-team', {
+      title: 'Add Team',
+      players: []
+    });
+  }
+};
+
+// Handle add team POST
+exports.addTeam = [upload.single('logo'), async (req, res) => {
+  try {
+    const { name, owner, ownerEmail, ownerPhone, budget, captain } = req.body;
+    const Team = require('../models/Team');
+    let logoPath = '/images/default-team.png';
+    if (req.file) {
+      logoPath = '/uploads/' + req.file.filename;
+    }
+    const team = new Team({
+      name,
+      owner,
+      ownerEmail,
+      ownerPhone,
+      budget,
+      logo: logoPath,
+      players: captain ? [captain] : []
+    });
+    await team.save();
+    req.flash('success_msg', 'Team added successfully');
+    res.redirect('/admin/teams');
+  } catch (err) {
+    console.error(err);
+    req.flash('error_msg', 'Failed to add team');
+    res.redirect('/admin/teams/add');
+  }
+}];
+const Auction = require('../models/Auction');
+// Schedule auction page
+exports.getScheduleAuction = async (req, res) => {
+  try {
+    const players = await Player.find({ status: { $in: ['unsold', 'in-auction'] } });
+    const auctions = await Auction.find()
+      .populate('player', 'name role')
+      .sort({ scheduledFor: 1 });
+    res.render('admin/schedule-auction', {
+      title: 'Schedule Auction',
+      players,
+      auctions
+    });
+  } catch (err) {
+    console.error(err);
+  res.render('errors/404', { title: 'Error', message: 'Server error' });
+  }
+};
+
+// Handle schedule auction POST
+exports.postScheduleAuction = async (req, res) => {
+  try {
+    const { player, scheduledFor } = req.body;
+    const auction = new Auction({ player, scheduledFor });
+    await auction.save();
+    res.redirect('/admin/schedule-auction');
+  } catch (err) {
+    console.error(err);
+  res.render('errors/404', { title: 'Error', message: 'Server error' });
+  }
+};
+// Auction history report
+exports.getAuctionHistory = async (req, res) => {
+  try {
+    // Get all bids with player and team populated
+    const bids = await require('../models/Bid').find()
+      .populate('player', 'name')
+      .populate('team', 'name')
+      .sort({ timestamp: -1 });
+
+    // Get top 5 most expensive players (for summary)
+    const topPlayers = await Player.find({ status: 'sold' })
+      .sort({ currentBid: -1 })
+      .limit(5);
+
+    res.render('admin/auction-history', {
+      title: 'Auction History',
+      bids,
+      topPlayers
+    });
+  } catch (err) {
+    console.error(err);
+    res.render('errors/404', {
+      title: 'Error',
+      message: 'Server error'
+    });
+  }
+};
 const Player = require('../models/Player');
 const Team = require('../models/Team');
 const Bid = require('../models/Bid');
@@ -36,13 +190,14 @@ exports.getAddPlayer = (req, res) => {
 
 // Add player handle
 exports.addPlayer = async (req, res) => {
-  const { name, role, basePrice, matches, runs, wickets } = req.body;
+  const { name, role, basePrice, matches, runs, wickets, image } = req.body;
   
   try {
     const player = new Player({
       name,
       role,
       basePrice,
+      image: image && image.length ? image : undefined,
       stats: {
         matches,
         runs,
@@ -181,21 +336,21 @@ exports.getTeamDetails = async (req, res) => {
 // Auction control
 exports.getAuction = async (req, res) => {
   try {
-    // Get all unsold players
-    let players = await Player.find({ status: 'unsold' });
-    
-    // If no unsold players, get all players that are not sold
-    if (players.length === 0) {
-      players = await Player.find({ status: { $ne: 'sold' } });
-    }
-    
-    const currentPlayer = await Player.findOne({ status: 'in-auction' });
-    
-    res.render('admin/auction', {
-      title: 'Auction Control',
-      players,
-      currentPlayer
-    });
+      // Get all teams to collect captains
+      const teams = await Team.find({}, 'players');
+      const captainIds = teams.map(t => t.players[0]).filter(Boolean);
+      // Get all unsold players except captains
+      let players = await Player.find({ status: 'unsold', _id: { $nin: captainIds } });
+      // If no unsold players, get all players that are not sold except captains
+      if (players.length === 0) {
+        players = await Player.find({ status: { $ne: 'sold' }, _id: { $nin: captainIds } });
+      }
+      const currentPlayer = await Player.findOne({ status: 'in-auction' });
+      res.render('admin/auction', {
+        title: 'Auction Control',
+        players,
+        currentPlayer
+      });
   } catch (err) {
     console.error(err);
     res.render('errors/404', {

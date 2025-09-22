@@ -5,19 +5,29 @@ const Bid = require('../models/Bid');
 // Team dashboard
 exports.getDashboard = async (req, res) => {
   try {
-    const team = await Team.findOne({ user: req.user._id })
-      .populate('players');
-    
+    let team = await Team.findOne({ user: req.user._id }).populate('players');
+    if (!team && req.user.role === 'team') {
+      // Auto-create team for this user
+      team = new Team({
+        name: req.user.username + " Team",
+        owner: req.user.username,
+        user: req.user._id,
+        budget: 10000000,
+        logo: '/images/default-team.png',
+        players: []
+      });
+      await team.save();
+      team = await Team.findOne({ user: req.user._id }).populate('players');
+    }
     if (!team) {
       return res.render('errors/404', {
+        title: 'Error',
         message: 'Team not found'
       });
     }
-    
     // Calculate total spent
     const totalSpent = team.players.reduce((sum, player) => sum + player.currentBid, 0);
     const remainingBudget = team.budget - totalSpent;
-    
     res.render('team/dashboard', {
       title: 'Team Dashboard',
       team,
@@ -27,6 +37,7 @@ exports.getDashboard = async (req, res) => {
   } catch (err) {
     console.error(err);
     res.render('errors/404', {
+      title: 'Error',
       message: 'Server error'
     });
   }

@@ -14,14 +14,19 @@
 </head>
 <body>
   <!-- Navigation -->
-  <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top">
+  <nav class="navbar navbar-expand-lg navbar-light sticky-top">
     <div class="container-fluid">
       <a class="navbar-brand d-flex align-items-center" href="/">
         <i class="bi bi-trophy-fill me-2"></i>
         <span class="fw-bold">Cricket Auction</span>
       </a>
       
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <!-- Sidebar toggle for mobile -->
+      <button class="btn btn-outline-primary d-lg-none me-2" type="button" id="sidebarToggle" data-bs-toggle="collapse" data-bs-target="#sidebarMenu" aria-controls="sidebarMenu" aria-expanded="false" aria-label="Toggle sidebar">
+        <i class="bi bi-list"></i>
+      </button>
+      
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
       </button>
       
@@ -48,6 +53,11 @@
                 <i class="bi bi-hammer me-1"></i> Auction
               </a>
             </li>
+            <li class="nav-item">
+              <a class="nav-link <%= title === 'Auction History' ? 'active' : '' %>" href="/admin/auction-history">
+                <i class="bi bi-clock-history me-1"></i> Auction History
+              </a>
+            </li>
           <% } else if (user && user.role === 'team') { %>
             <li class="nav-item">
               <a class="nav-link <%= title === 'Team Dashboard' ? 'active' : '' %>" href="/team/dashboard">
@@ -61,6 +71,22 @@
             </li>
             <li class="nav-item">
               <a class="nav-link <%= title === 'Live Auction' ? 'active' : '' %>" href="/team/auction">
+                <i class="bi bi-hammer me-1"></i> Auction
+              </a>
+            </li>
+          <% } else { %>
+            <li class="nav-item">
+              <a class="nav-link <%= title === 'Home' ? 'active' : '' %>" href="/">
+                <i class="bi bi-house me-1"></i> Home
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/team/players">
+                <i class="bi bi-people me-1"></i> Players
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/team/auction">
                 <i class="bi bi-hammer me-1"></i> Auction
               </a>
             </li>
@@ -113,34 +139,26 @@
     <% } %>
   </div>
   
-  <!-- Main Content with Sidebar -->
+  <!-- Main Content (Sidebar removed) -->
   <div class="container-fluid">
-    <div class="row">
-      <!-- Sidebar -->
-      <%- include('../partials/sidebar') %>
-      
-      <!-- Main Content -->
-      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4">
-        <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-          <h1 class="h2"><%= title %></h1>
-          <div class="btn-toolbar mb-2 mb-md-0">
-            <div class="btn-group me-2">
-              <button type="button" class="btn btn-sm btn-outline-secondary">Export</button>
-              <button type="button" class="btn btn-sm btn-outline-secondary">Share</button>
-            </div>
-            <button type="button" class="btn btn-sm btn-outline-secondary dropdown-toggle d-flex align-items-center">
-              <i class="bi bi-gear me-1"></i> Settings
-            </button>
-          </div>
+    <main class="px-md-4">
+      <div class="d-flex justify-content-between align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <div class="d-flex align-items-center gap-3">
+          <% if (typeof teamLogo !== 'undefined' && teamLogo) { %>
+            <img src="<%= teamLogo %>" alt="Team Logo" class="rounded-circle border" style="width:56px;height:56px;object-fit:cover;">
+          <% } %>
+          <% if (typeof captainImage !== 'undefined' && captainImage) { %>
+            <img src="<%= captainImage %>" alt="Captain Image" class="rounded-circle border" style="width:56px;height:56px;object-fit:cover;">
+          <% } %>
+          <h1 class="h2 mb-0"><%= title %></h1>
         </div>
-        
-        <%- body %>
-      </main>
-    </div>
+      </div>
+      <%- body %>
+    </main>
   </div>
   
   <!-- Footer -->
-  <footer class="bg-dark text-white py-4 mt-5">
+  <footer class="text-white py-4 mt-5">
     <div class="container">
       <div class="row">
         <div class="col-md-4 mb-4 mb-md-0">

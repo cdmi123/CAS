@@ -1,7 +1,21 @@
+// Player comparison API
+const Player = require('../models/Player');
+
 const express = require('express');
 const router = express.Router();
 const auctionController = require('../controllers/auctionController');
 
+router.get('/compare-players', async (req, res) => {
+	try {
+		const { id1, id2 } = req.query;
+		if (!id1 || !id2) return res.status(400).json({ error: 'Missing player ids' });
+		const p1 = await Player.findById(id1);
+		const p2 = await Player.findById(id2);
+		res.json({ p1, p2 });
+	} catch (err) {
+		res.status(500).json({ error: 'Server error' });
+	}
+});
 // Place a bid
 router.post('/bid', auctionController.placeBid);
 
